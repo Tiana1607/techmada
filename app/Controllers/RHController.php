@@ -25,9 +25,9 @@ class RHController extends BaseController
      */
     public function dashboard()
     {
-        $demandEnAttente = $this->congeModel->countByStatut('en_attente');
-        $demandApprouvee = $this->congeModel->countByStatut('approuvee');
-        $demandRefusee = $this->congeModel->countByStatut('refusee');
+        $demandEnAttente = $this->countCongesByStatut('en_attente');
+        $demandApprouvee = $this->countCongesByStatut('approuvee');
+        $demandRefusee = $this->countCongesByStatut('refusee');
 
         return view('rh/dashboard', [
             'enAttente' => $demandEnAttente,
@@ -44,7 +44,7 @@ class RHController extends BaseController
         $statut = $this->request->getGet('statut') ?? 'en_attente';
         $departementId = $this->request->getGet('departement_id');
 
-        $demandes = $this->congeModel->listByStatut($statut, $departementId);
+        $demandes = $this->getDemandesByFilters($statut, $departementId);
 
         return view('rh/list_demandes', [
             'demandes' => $demandes,
@@ -87,7 +87,9 @@ class RHController extends BaseController
         }
 
         $annee = date('Y');
-        $solde = $this->soldeModel->getSolde($conge['employe_id'], $conge['type_conge_id'], $annee);
+        $employeId = (int) $conge['employe_id'];
+        $typeCongeId = (int) $conge['type_conge_id'];
+        $solde = $this->soldeModel->getSolde($employeId, $typeCongeId, $annee);
 
         // Vérifier le solde avant approbation
         if (!$solde || ($solde['jours_pris'] + $conge['nb_jours']) > $solde['jours_attribues']) {
@@ -102,10 +104,10 @@ class RHController extends BaseController
 
         // Mettre à jour le solde (incrémenter jours_pris)
         $this->soldeModel->updatePrise(
-            $conge['employe_id'],
-            $conge['type_conge_id'],
+            $employeId,
+            $typeCongeId,
             $annee,
-            $conge['nb_jours']
+            (float) $conge['nb_jours']
         );
 
         return redirect()->back()->with('success', 'Demande approuvée avec succès');
@@ -147,7 +149,7 @@ class RHController extends BaseController
         $employeId = $this->request->getGet('employe_id');
 
         if ($statut) {
-            $demandes = $this->congeModel->listByStatut($statut);
+            $demandes = $this->getDemandesByFilters($statut);
         } elseif ($employeId) {
             $demandes = $this->congeModel->listByEmploye($employeId);
         } else {
@@ -157,5 +159,36 @@ class RHController extends BaseController
         return view('rh/historique_demandes', [
             'demandes' => $demandes,
         ]);
+    }
+
+    /**
+     * Compte les congés selon un statut via le builder du modèle.
+     */
+    private function countCongesByStatut(string $statut): int
+    {
+        return $this->congeModel
+            ->builder()
+            ->where('statut', $statut)
+            ->countAllResults();
+    }
+
+    /**
+     * Récupère les demandes avec filtre statut et/ou département sans dépendre de méthodes manquantes.
+     */
+    private function getDemandesByFilters(?string $statut = null, ?string $departementId = null): array
+    {
+        $builder = $this->congeModel->builder();
+        $builder->select('conges.*')
+            ->join('employes', 'employes.id = conges.employe_id', 'left');
+
+        if ($statut) {
+            $builder->where('conges.statut', $statut);
+        }
+
+        if ($departementId !== null && $departementId !== '') {
+            $builder->where('employes.departement_id', $departementId);
+        }
+
+        return $builder->orderBy('conges.created_at', 'DESC')->get()->getResultArray();
     }
 }

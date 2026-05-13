@@ -31,11 +31,9 @@ class EmployeController extends BaseController
     {
         $annee = date('Y');
         
-        // Récupérer les soldes de l'année courante
-        $soldes = $this->soldeModel->getSoldesAnnee($this->userId, $annee);
-        
-        // Récupérer les 5 dernières demandes
-        $dernieresDemandes = $this->congeModel->listByEmploye($this->userId, 5);
+        $soldes = $this->getSoldesAnnee($this->userId, $annee);
+
+        $dernieresDemandes = array_slice($this->congeModel->listByEmploye($this->userId), 0, 5);
 
         return view('employe/dashboard', [
             'soldes' => $soldes,
@@ -97,7 +95,7 @@ class EmployeController extends BaseController
             'created_at' => date('Y-m-d H:i:s'),
         ];
 
-        if ($this->congeModel->insert($dataConge)) {
+        if ($this->congeModel->createDemande($dataConge)) {
             return redirect()->to('/employe/mes-demandes')->with('success', 'Demande de congé créée avec succès');
         } else {
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la création de la demande');
@@ -157,4 +155,21 @@ class EmployeController extends BaseController
         
         return $nbJours;
     }
+
+            /**
+             * Récupère les soldes d'un employé pour une année donnée.
+             */
+            private function getSoldesAnnee(int $employeId, int $annee): array
+            {
+                $soldes = $this->soldeModel
+                    ->where('employe_id', $employeId)
+                    ->where('annee', $annee)
+                    ->findAll();
+
+                foreach ($soldes as &$solde) {
+                    $solde['jours_restants'] = (float) $solde['jours_attribues'] - (float) $solde['jours_pris'];
+                }
+
+                return $soldes;
+            }
 }

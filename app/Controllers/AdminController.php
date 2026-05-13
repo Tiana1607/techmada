@@ -6,6 +6,7 @@ use App\Models\Employe;
 use App\Models\Departement;
 use App\Models\TypeConge;
 use App\Models\Solde;
+use \CodeIgniter\Exceptions\PageNotFoundException;
 
 class AdminController extends BaseController
 {
@@ -61,7 +62,7 @@ class AdminController extends BaseController
         if ($id) {
             $employe = $this->employeModel->find($id);
             if (!$employe) {
-                throw new \CodeIgniter\Exceptions\PageNotFoundException("Employé non trouvé");
+                throw new PageNotFoundException("Employé non trouvé");
             }
         }
 
@@ -116,7 +117,7 @@ class AdminController extends BaseController
     {
         $employe = $this->employeModel->find($id);
         if (!$employe) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Employé non trouvé");
+            throw new PageNotFoundException("Employé non trouvé");
         }
 
         $validation = \Config\Services::validation();
@@ -144,6 +145,8 @@ class AdminController extends BaseController
         $newPassword = $this->request->getPost('password');
         if ($newPassword) {
             $data['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+        } else {
+            $data['password'] = $employe['password'];
         }
 
         if ($this->employeModel->update($id, $data)) {
@@ -160,7 +163,7 @@ class AdminController extends BaseController
     {
         $employe = $this->employeModel->find($id);
         if (!$employe) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Employé non trouvé");
+            throw new PageNotFoundException("Employé non trouvé");
         }
 
         if ($this->employeModel->update($id, ['actif' => 0])) {
@@ -193,7 +196,7 @@ class AdminController extends BaseController
         if ($id) {
             $departement = $this->departementModel->find($id);
             if (!$departement) {
-                throw new \CodeIgniter\Exceptions\PageNotFoundException("Département non trouvé");
+                throw new PageNotFoundException("Département non trouvé");
             }
         }
 
@@ -229,14 +232,14 @@ class AdminController extends BaseController
         }
     }
 
-    /**
+    /**"
      * Met à jour un département
      */
     public function updateDepartement($id)
     {
         $departement = $this->departementModel->find($id);
         if (!$departement) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Département non trouvé");
+            throw new PageNotFoundException("Département non trouvé");
         }
 
         $validation = \Config\Services::validation();
@@ -284,7 +287,7 @@ class AdminController extends BaseController
         if ($id) {
             $type = $this->typeCongeModel->find($id);
             if (!$type) {
-                throw new \CodeIgniter\Exceptions\PageNotFoundException("Type de congé non trouvé");
+                throw new PageNotFoundException("Type de congé non trouvé");
             }
         }
 
@@ -329,7 +332,7 @@ class AdminController extends BaseController
     {
         $type = $this->typeCongeModel->find($id);
         if (!$type) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Type de congé non trouvé");
+            throw new PageNotFoundException("Type de congé non trouvé");
         }
 
         $validation = \Config\Services::validation();
@@ -364,7 +367,7 @@ class AdminController extends BaseController
     public function listSoldes()
     {
         $annee = $this->request->getGet('annee') ?? date('Y');
-        $soldes = $this->soldeModel->findAllByAnnee($annee);
+        $soldes = $this->getSoldesByAnnee((int) $annee);
 
         return view('admin/soldes/list', [
             'soldes' => $soldes,
@@ -404,5 +407,21 @@ class AdminController extends BaseController
         }
 
         return redirect()->to('/admin/soldes')->with('success', 'Soldes initialisés avec succès pour l\'année ' . $annee);
+    }
+
+    /**
+     * Récupère tous les soldes d'une année donnée.
+     */
+    private function getSoldesByAnnee(int $annee): array
+    {
+        $soldes = $this->soldeModel
+            ->where('annee', $annee)
+            ->findAll();
+
+        foreach ($soldes as &$solde) {
+            $solde['jours_restants'] = (float) $solde['jours_attribues'] - (float) $solde['jours_pris'];
+        }
+
+        return $soldes;
     }
 }
