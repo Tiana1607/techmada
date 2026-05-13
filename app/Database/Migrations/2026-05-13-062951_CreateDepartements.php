@@ -8,7 +8,7 @@ class CreateDepartements extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+            'id' => ['type' => 'INTEGER', 'auto_increment' => true],
             'nom' => ['type' => 'VARCHAR', 'constraint' => 150],
             'description' => ['type' => 'TEXT', 'null' => true],
         ]);

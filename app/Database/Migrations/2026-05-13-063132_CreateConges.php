@@ -8,9 +8,9 @@ class CreateConges extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
-            'employe_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
-            'type_conge_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+            'id' => ['type' => 'INTEGER', 'auto_increment' => true],
+            'employe_id' => ['type' => 'INTEGER'],
+            'type_conge_id' => ['type' => 'INTEGER'],
             'date_debut' => ['type' => 'DATE'],
             'date_fin' => ['type' => 'DATE'],
             'nb_jours' => ['type' => 'FLOAT', 'default' => 0],
@@ -18,7 +18,7 @@ class CreateConges extends Migration
             'statut' => ['type' => 'VARCHAR', 'constraint' => 50, 'default' => 'en_attente'],
             'commentaire_rh' => ['type' => 'TEXT', 'null' => true],
             'created_at' => ['type' => 'DATETIME', 'null' => true],
-            'traite_par' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'null' => true],
+            'traite_par' => ['type' => 'INTEGER', 'null' => true],
         ]);
         $this->forge->addKey('id', true);
         $this->forge->addForeignKey('employe_id', 'employes', 'id', 'CASCADE', 'CASCADE');

@@ -8,10 +8,10 @@ class CreateTypesConge extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+            'id' => ['type' => 'INTEGER', 'auto_increment' => true],
             'libelle' => ['type' => 'VARCHAR', 'constraint' => 150],
-            'jours_annuels' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
-            'deductible' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],
+            'jours_annuels' => ['type' => 'INTEGER', 'default' => 0],
+            'deductible' => ['type' => 'INTEGER', 'default' => 0],
         ]);
         $this->forge->addKey('id', true);
         $this->forge->createTable('types_conge');

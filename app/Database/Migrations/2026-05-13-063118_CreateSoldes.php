@@ -8,10 +8,10 @@ class CreateSoldes extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
-            'employe_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
-            'type_conge_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
-            'annee' => ['type' => 'INT', 'constraint' => 4],
+            'id' => ['type' => 'INTEGER', 'auto_increment' => true],
+            'employe_id' => ['type' => 'INTEGER'],
+            'type_conge_id' => ['type' => 'INTEGER'],
+            'annee' => ['type' => 'INTEGER'],
             'jours_attribues' => ['type' => 'FLOAT', 'default' => 0],
             'jours_pris' => ['type' => 'FLOAT', 'default' => 0],
             'jours_restants' => ['type' => 'FLOAT', 'default' => 0],
