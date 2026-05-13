@@ -10,7 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
-        <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>">
 </head>
 
 <body>
@@ -27,7 +27,8 @@
                         <p class="auth-left-brand">TechMada RH<span>Gestion des congés</span></p>
                         <p class="auth-left-text" style="margin-top:2rem">
                             <strong>Bienvenue sur votre espace RH.</strong>
-                            Gérez vos demandes de congés, consultez votre solde et suivez l'état de vos demandes en temps réel.
+                            Gérez vos demandes de congés, consultez votre solde et suivez l'état de vos demandes en
+                            temps réel.
                         </p>
                     </div>
                     <div class="auth-roles">
@@ -69,25 +70,25 @@
                     <?php $flashErrorText = is_array($flashError) ? implode(' ', $flashError) : (string) $flashError; ?>
                     <?php $flashSuccessText = is_array($flashSuccess) ? implode(' ', $flashSuccess) : (string) $flashSuccess; ?>
 
-                    <?php if (! empty($flashError)) : ?>
+                    <?php if (!empty($flashError)): ?>
                         <div class="flash flash-error" style="margin-bottom:1rem">
                             <i class="bi bi-exclamation-circle-fill"></i>
                             <?= esc($flashErrorText) ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (! empty($flashSuccess)) : ?>
+                    <?php if (!empty($flashSuccess)): ?>
                         <div class="flash flash-success" style="margin-bottom:1rem">
                             <i class="bi bi-check-circle-fill"></i>
                             <?= esc($flashSuccessText) ?>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (! empty($flashErrors)) : ?>
+                    <?php if (!empty($flashErrors)): ?>
                         <div class="flash flash-error" style="margin-bottom:1rem">
                             <i class="bi bi-exclamation-circle-fill"></i>
                             <div>
-                                <?php foreach ((array) $flashErrors as $error) : ?>
+                                <?php foreach ((array) $flashErrors as $error): ?>
                                     <?php $errorText = is_array($error) ? implode(' ', $error) : (string) $error; ?>
                                     <div><?= esc($errorText) ?></div>
                                 <?php endforeach; ?>
@@ -99,7 +100,8 @@
                         <?= csrf_field() ?>
                         <div class="f-group">
                             <label class="f-label">Adresse email</label>
-                            <input type="email" name="email" class="f-input" placeholder="vous@techmada.mg" value="<?= esc(old('email') ?? '') ?>" />
+                            <input type="email" name="email" class="f-input" placeholder="vous@techmada.mg"
+                                value="<?= esc(old('email') ?? '') ?>" />
                         </div>
                         <div class="f-group">
                             <label class="f-label">Mot de passe</label>

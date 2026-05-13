@@ -34,6 +34,19 @@ $routes->group('rh', ['filter' => 'auth'], static function ($routes) {
 // ===== ROUTES PROTEGEES - ADMIN =====
 $routes->group('admin', ['filter' => 'auth'], static function ($routes) {
     $routes->get('dashboard', 'AdminController::dashboard');
+    
+    // Routes AJAX pour charger les sections
+    $routes->get('ajax/employes', 'AdminController::ajaxEmployes');
+    $routes->get('ajax/departements', 'AdminController::ajaxDepartements');
+    $routes->get('ajax/types', 'AdminController::ajaxTypes');
+    $routes->get('ajax/soldes', 'AdminController::ajaxSoldes');
+    $routes->get('ajax/form/employe', 'AdminController::ajaxFormEmploye');
+    $routes->get('ajax/form/employe/(:num)', 'AdminController::ajaxFormEmploye/$1');
+    $routes->get('ajax/form/departement', 'AdminController::ajaxFormDepartement');
+    $routes->get('ajax/form/departement/(:num)', 'AdminController::ajaxFormDepartement/$1');
+    $routes->get('ajax/form/type', 'AdminController::ajaxFormType');
+    $routes->get('ajax/form/type/(:num)', 'AdminController::ajaxFormType/$1');
+    
     $routes->get('employes', 'AdminController::listEmployes');
     $routes->get('employes/create', 'AdminController::formEmploye');
     $routes->post('employes', 'AdminController::createEmploye');
@@ -46,12 +59,14 @@ $routes->group('admin', ['filter' => 'auth'], static function ($routes) {
     $routes->post('departements', 'AdminController::createDepartement');
     $routes->get('departements/(:num)/edit', 'AdminController::formDepartement/$1');
     $routes->post('departements/(:num)', 'AdminController::updateDepartement/$1');
+    $routes->delete('departements/(:num)', 'AdminController::deleteDepartement/$1');
     
     $routes->get('types', 'AdminController::listTypes');
     $routes->get('types/create', 'AdminController::formType');
     $routes->post('types', 'AdminController::createType');
     $routes->get('types/(:num)/edit', 'AdminController::formType/$1');
     $routes->post('types/(:num)', 'AdminController::updateType/$1');
+    $routes->delete('types/(:num)', 'AdminController::deleteType/$1');
     
     $routes->get('soldes', 'AdminController::listSoldes');
     $routes->post('soldes/init', 'AdminController::initSoldes');

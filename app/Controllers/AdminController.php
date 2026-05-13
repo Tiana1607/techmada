@@ -6,6 +6,7 @@ use App\Models\Employe;
 use App\Models\Departement;
 use App\Models\TypeConge;
 use App\Models\Solde;
+use App\Models\Conge;
 use \CodeIgniter\Exceptions\PageNotFoundException;
 
 class AdminController extends BaseController
@@ -14,6 +15,7 @@ class AdminController extends BaseController
     protected $departementModel;
     protected $typeCongeModel;
     protected $soldeModel;
+    protected $congeModel;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class AdminController extends BaseController
         $this->departementModel = new Departement();
         $this->typeCongeModel = new TypeConge();
         $this->soldeModel = new Solde();
+        $this->congeModel = new Conge();
     }
 
     /**
@@ -28,14 +31,165 @@ class AdminController extends BaseController
      */
     public function dashboard()
     {
-        $nbEmployes = $this->employeModel->countAll();
+        // Compter les employés SANS qdmin
+        $nbEmployes = $this->employeModel->builder()
+            ->where('role !=', 'admin')
+            ->countAllResults();
+        
         $nbDepartements = $this->departementModel->countAll();
         $nbTypesCong = $this->typeCongeModel->countAll();
+        
+        // Compter les demandes par statut
+        $nbEnAttente = $this->congeModel->builder()->where('statut', 'en_attente')->countAllResults();
+        $nbApprouvee = $this->congeModel->builder()->where('statut', 'approuvee')->countAllResults();
+        
+        // Récupérer les 5 dernières demandes pour affichage
+        $dernieresDemandes = $this->congeModel->orderBy('created_at', 'DESC')->limit(5)->findAll();
+        
+        // Employés absents aujourd'hui
+        $today = date('Y-m-d');
+        $absentAujourdhui = $this->congeModel->builder()
+            ->select('conges.*, employes.nom, employes.prenom, types_conge.libelle')
+            ->join('employes', 'employes.id = conges.employe_id', 'left')
+            ->join('types_conge', 'types_conge.id = conges.type_conge_id', 'left')
+            ->where('conges.statut', 'approuvee')
+            ->where('conges.date_debut <=', $today)
+            ->where('conges.date_fin >=', $today)
+            ->orderBy('conges.date_fin', 'ASC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+        
+        $soldesCritiques = $this->soldeModel->builder()
+            ->select('soldes.*, employes.nom, employes.prenom')
+            ->join('employes', 'employes.id = soldes.employe_id', 'left')
+            ->where('annee', date('Y'))
+            ->get()
+            ->getResultArray();
+        
+        // Calculer jours_restants pour chaque solde
+        foreach ($soldesCritiques as &$solde) {
+            $solde['jours_restants'] = (float)$solde['jours_attribues'] - (float)$solde['jours_pris'];
+        }
+        
+        // Filtrer les soldes critiques
+        $soldesCritiques = array_filter($soldesCritiques, function($s) {
+            return $s['jours_restants'] <= 2;
+        });
 
         return view('admin/dashboard', [
             'nbEmployes' => $nbEmployes,
             'nbDepartements' => $nbDepartements,
             'nbTypesCong' => $nbTypesCong,
+            'nbEnAttente' => $nbEnAttente,
+            'nbApprouvee' => $nbApprouvee,
+            'dernieresDemandes' => $dernieresDemandes,
+            'absentAujourdhui' => $absentAujourdhui,
+            'soldesCritiques' => $soldesCritiques,
+        ]);
+    }
+
+    /**
+     * Charge la liste des employés via AJAX
+     */
+    public function ajaxEmployes()
+    {
+        $employes = $this->employeModel->findAll();
+        return view('admin/sections/employes', ['employes' => $employes]);
+    }
+
+    /**
+     * Charge la liste des départements via AJAX
+     */
+    public function ajaxDepartements()
+    {
+        $departements = $this->departementModel->findAll();
+        return view('admin/sections/departements', ['departements' => $departements]);
+    }
+
+    /**
+     * Charge la liste des types de congé via AJAX
+     */
+    public function ajaxTypes()
+    {
+        $types = $this->typeCongeModel->findAll();
+        return view('admin/sections/types', ['types' => $types]);
+    }
+
+    /**
+     * Charge la liste des soldes via AJAX
+     */
+    public function ajaxSoldes()
+    {
+        $soldes = $this->soldeModel->builder()
+            ->select('soldes.*, employes.nom, employes.prenom, types_conge.libelle')
+            ->join('employes', 'employes.id = soldes.employe_id', 'left')
+            ->join('types_conge', 'types_conge.id = soldes.type_conge_id', 'left')
+            ->where('annee', date('Y'))
+            ->orderBy('soldes.employe_id', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // Calculer jours_restants
+        foreach ($soldes as &$solde) {
+            $solde['jours_restants'] = (float)$solde['jours_attribues'] - (float)$solde['jours_pris'];
+        }
+
+        return view('admin/sections/soldes', ['soldes' => $soldes]);
+    }
+
+    /**
+     * Formulaire popup AJAX pour un employé
+     */
+    public function ajaxFormEmploye($id = null)
+    {
+        $employe = null;
+        if ($id) {
+            $employe = $this->employeModel->find($id);
+            if (!$employe) {
+                throw new PageNotFoundException('Employé non trouvé');
+            }
+        }
+
+        return view('admin/modals/employe_form', [
+            'employe' => $employe,
+            'departements' => $this->departementModel->findAll(),
+        ]);
+    }
+
+    /**
+     * Formulaire popup AJAX pour un département
+     */
+    public function ajaxFormDepartement($id = null)
+    {
+        $departement = null;
+        if ($id) {
+            $departement = $this->departementModel->find($id);
+            if (!$departement) {
+                throw new PageNotFoundException('Département non trouvé');
+            }
+        }
+
+        return view('admin/modals/departement_form', [
+            'departement' => $departement,
+        ]);
+    }
+
+    /**
+     * Formulaire popup AJAX pour un type de congé
+     */
+    public function ajaxFormType($id = null)
+    {
+        $type = null;
+        if ($id) {
+            $type = $this->typeCongeModel->find($id);
+            if (!$type) {
+                throw new PageNotFoundException('Type de congé non trouvé');
+            }
+        }
+
+        return view('admin/modals/type_form', [
+            'type' => $type,
         ]);
     }
 
@@ -90,6 +244,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -104,8 +265,16 @@ class AdminController extends BaseController
         ];
 
         if ($this->employeModel->insert($data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Employé créé avec succès']);
+            }
+
             return redirect()->to('/admin/employes')->with('success', 'Employé créé avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la création']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la création');
         }
     }
@@ -130,6 +299,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -150,8 +326,16 @@ class AdminController extends BaseController
         }
 
         if ($this->employeModel->update($id, $data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Employé mis à jour avec succès']);
+            }
+
             return redirect()->to('/admin/employes')->with('success', 'Employé mis à jour avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la mise à jour']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la mise à jour');
         }
     }
@@ -167,8 +351,16 @@ class AdminController extends BaseController
         }
 
         if ($this->employeModel->update($id, ['actif' => 0])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Employé désactivé avec succès']);
+            }
+
             return redirect()->back()->with('success', 'Employé désactivé avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la désactivation']);
+            }
+
             return redirect()->back()->with('error', 'Erreur lors de la désactivation');
         }
     }
@@ -217,6 +409,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -226,8 +425,16 @@ class AdminController extends BaseController
         ];
 
         if ($this->departementModel->insert($data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Département créé avec succès']);
+            }
+
             return redirect()->to('/admin/departements')->with('success', 'Département créé avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la création']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la création');
         }
     }
@@ -249,6 +456,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -258,10 +472,43 @@ class AdminController extends BaseController
         ];
 
         if ($this->departementModel->update($id, $data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Département mis à jour avec succès']);
+            }
+
             return redirect()->to('/admin/departements')->with('success', 'Département mis à jour avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la mise à jour']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la mise à jour');
         }
+    }
+
+    /**
+     * Supprime un département
+     */
+    public function deleteDepartement($id)
+    {
+        $departement = $this->departementModel->find($id);
+        if (!$departement) {
+            throw new PageNotFoundException('Département non trouvé');
+        }
+
+        if ($this->departementModel->delete($id)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Département supprimé avec succès']);
+            }
+
+            return redirect()->back()->with('success', 'Département supprimé avec succès');
+        }
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la suppression']);
+        }
+
+        return redirect()->back()->with('error', 'Erreur lors de la suppression');
     }
 
     // ===== CRUD TYPES DE CONGE =====
@@ -309,6 +556,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -319,8 +573,16 @@ class AdminController extends BaseController
         ];
 
         if ($this->typeCongeModel->insert($data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Type de congé créé avec succès']);
+            }
+
             return redirect()->to('/admin/types')->with('success', 'Type de congé créé avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la création']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la création');
         }
     }
@@ -343,6 +605,13 @@ class AdminController extends BaseController
         ]);
 
         if (!$validation->run($this->request->getPost())) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors(),
+                ]);
+            }
+
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -353,10 +622,43 @@ class AdminController extends BaseController
         ];
 
         if ($this->typeCongeModel->update($id, $data)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Type de congé mis à jour avec succès']);
+            }
+
             return redirect()->to('/admin/types')->with('success', 'Type de congé mis à jour avec succès');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la mise à jour']);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Erreur lors de la mise à jour');
         }
+    }
+
+    /**
+     * Supprime un type de congé
+     */
+    public function deleteType($id)
+    {
+        $type = $this->typeCongeModel->find($id);
+        if (!$type) {
+            throw new PageNotFoundException('Type de congé non trouvé');
+        }
+
+        if ($this->typeCongeModel->delete($id)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => true, 'message' => 'Type de congé supprimé avec succès']);
+            }
+
+            return redirect()->back()->with('success', 'Type de congé supprimé avec succès');
+        }
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Erreur lors de la suppression']);
+        }
+
+        return redirect()->back()->with('error', 'Erreur lors de la suppression');
     }
 
     // ===== GESTION SOLDES =====
@@ -404,6 +706,13 @@ class AdminController extends BaseController
                     ]);
                 }
             }
+        }
+
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Soldes initialisés avec succès pour l\'année ' . $annee,
+            ]);
         }
 
         return redirect()->to('/admin/soldes')->with('success', 'Soldes initialisés avec succès pour l\'année ' . $annee);
