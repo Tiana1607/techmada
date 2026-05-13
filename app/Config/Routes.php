@@ -18,6 +18,7 @@ $routes->group('employe', ['filter' => 'auth'], static function ($routes) {
     $routes->get('demande', 'EmployeController::formulaire');
     $routes->post('demande', 'EmployeController::submitDemande');
     $routes->get('mes-demandes', 'EmployeController::listDemandes');
+    $routes->get('profil', 'EmployeController::profil');
     $routes->post('demande/(:num)/cancel', 'EmployeController::cancelDemande/$1');
 });
 
