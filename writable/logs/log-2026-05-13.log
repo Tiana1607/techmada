@@ -30,6 +30,7 @@ in SYSTEMPATH/Database/BaseConnection.php on line 606.
  8 SYSTEMPATH/Boot.php(442): CodeIgniter\CLI\Console->run()
  9 SYSTEMPATH/Boot.php(166): CodeIgniter\Boot::runCommand()
 10 ROOTPATH/spark(87): CodeIgniter\Boot::bootSpark()
+<<<<<<< HEAD
 ERROR - 2026-05-13 07:02:10 --> near ")": syntax error
 in SYSTEMPATH/Database/SQLite3/Connection.php on line 163.
  1 SYSTEMPATH/Database/SQLite3/Connection.php(163): SQLite3->exec()
@@ -46,6 +47,9 @@ in SYSTEMPATH/Database/SQLite3/Connection.php on line 163.
 12 SYSTEMPATH/Boot.php(166): CodeIgniter\Boot::runCommand()
 13 ROOTPATH/spark(87): CodeIgniter\Boot::bootSpark()
 ERROR - 2026-05-13 07:04:37 --> near ")": syntax error
+=======
+ERROR - 2026-05-13 07:02:31 --> near ")": syntax error
+>>>>>>> 313a6b6 (todo)
 in SYSTEMPATH/Database/SQLite3/Connection.php on line 163.
  1 SYSTEMPATH/Database/SQLite3/Connection.php(163): SQLite3->exec()
  2 SYSTEMPATH/Database/BaseConnection.php(910): CodeIgniter\Database\SQLite3\Connection->execute()
