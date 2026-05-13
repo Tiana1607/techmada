@@ -127,9 +127,9 @@
                             <div class="data-card" style="margin:0">
                                 <div class="data-card-head">
                                     <h3>Demandes récentes</h3>
-                                    <a href="<?= site_url('/rh/demandes') ?>"
+                                    <!-- <a href="<?= site_url('/rh/demandes') ?>"
                                         style="font-size:.8rem;color:var(--forest);text-decoration:none">Tout voir
-                                        →</a>
+                                        →</a> -->
                                 </div>
                                 <table class="tbl">
                                     <thead>
