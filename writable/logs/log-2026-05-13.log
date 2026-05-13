@@ -2,3 +2,31 @@ CRITICAL - 2026-05-13 06:33:13 --> ErrorException: Cannot declare class App\Data
 [Method: CLI, Route: migrate]
 in APPPATH/Database/Migrations/2026-05-13-063025_CreateTypesConge.php on line 6.
  1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+ERROR - 2026-05-13 06:52:12 --> Error connecting to the database: Error: Class "SQLite3" not found in /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/SQLite3/Connection.php:111
+Stack trace:
+#0 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/BaseConnection.php(555): CodeIgniter\Database\SQLite3\Connection->connect()
+#1 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/SQLite3/Connection.php(74): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/Database.php(74): CodeIgniter\Database\SQLite3\Connection->initialize()
+#3 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/Config.php(111): CodeIgniter\Database\Database->loadForge()
+#4 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Database/Seeder.php(103): CodeIgniter\Database\Config::forge()
+#5 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Commands/Database/Seed.php(71): CodeIgniter\Database\Seeder->__construct()
+#6 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/CLI/Commands.php(74): CodeIgniter\Commands\Database\Seed->run()
+#7 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+#8 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Boot.php(442): CodeIgniter\CLI\Console->run()
+#9 /home/alberto/s4/Système_d'information(Rojo)/techmada/system/Boot.php(166): CodeIgniter\Boot::runCommand()
+#10 /home/alberto/s4/Système_d'information(Rojo)/techmada/spark(87): CodeIgniter\Boot::bootSpark()
+#11 {main}
+CRITICAL - 2026-05-13 06:52:12 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [SQLite3]: Class "SQLite3" not found
+[Method: CLI, Route: db:seed/MainSeeder]
+in SYSTEMPATH/Database/BaseConnection.php on line 606.
+ 1 SYSTEMPATH/Database/SQLite3/Connection.php(74): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/Database.php(74): CodeIgniter\Database\SQLite3\Connection->initialize()
+ 3 SYSTEMPATH/Database/Config.php(111): CodeIgniter\Database\Database->loadForge()
+ 4 SYSTEMPATH/Database/Seeder.php(103): CodeIgniter\Database\Config::forge()
+ 5 SYSTEMPATH/Commands/Database/Seed.php(71): CodeIgniter\Database\Seeder->__construct()
+ 6 SYSTEMPATH/CLI/Commands.php(74): CodeIgniter\Commands\Database\Seed->run()
+ 7 SYSTEMPATH/CLI/Console.php(47): CodeIgniter\CLI\Commands->run()
+ 8 SYSTEMPATH/Boot.php(442): CodeIgniter\CLI\Console->run()
+ 9 SYSTEMPATH/Boot.php(166): CodeIgniter\Boot::runCommand()
+10 ROOTPATH/spark(87): CodeIgniter\Boot::bootSpark()
