@@ -41,7 +41,7 @@ class MainSeeder extends Seeder
             'nom' => 'Rasoa',
             'prenom' => 'Marie',
             'email' => 'marie@tech.mg',
-            'password' => password_hash('rh123', PASSWORD_DEFAULT),
+            'password' => password_hash('rh123456', PASSWORD_DEFAULT),
             'role' => 'rh',
             'departement_id' => 1,
             'actif' => 1

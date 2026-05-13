@@ -53,7 +53,7 @@
                             <i class="bi bi-person"></i>
                             <div>
                                 <div class="role-pill-name">Responsable RH</div>
-                                <div class="role-pill-cred">marie@tech.mg · rh123</div>
+                                <div class="role-pill-cred">marie@tech.mg · rh123456</div>
                             </div>
                         </div>
                     </div>

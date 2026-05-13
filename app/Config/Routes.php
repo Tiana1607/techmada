@@ -24,6 +24,8 @@ $routes->group('employe', ['filter' => 'auth'], static function ($routes) {
 // ===== ROUTES PROTEGEES - RH =====
 $routes->group('rh', ['filter' => 'auth'], static function ($routes) {
     $routes->get('dashboard', 'RHController::dashboard');
+    $routes->get('ajax/demandes', 'RHController::ajaxDemandes');
+    $routes->get('ajax/historique', 'RHController::ajaxHistorique');
     $routes->get('demandes', 'RHController::index');
     $routes->get('demandes/(:num)', 'RHController::detail/$1');
     $routes->post('demandes/(:num)/approuver', 'RHController::approuver/$1');

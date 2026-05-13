@@ -36,12 +36,12 @@
                 <ul class="sidebar-nav">
                     <li><a href="<?= site_url('/admin/dashboard') ?>" class="active"><i class="bi bi-speedometer2"></i>
                             Vue d'ensemble</a></li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= site_url('/rh/demandes') ?>">
                             <i class="bi bi-inbox"></i> Toutes les demandes
                             <span class="nav-badge alert"><?= $nbEnAttente ?? 0 ?></span>
                         </a>
-                    </li>
+                    </li> -->
                     <li><a href="<?= site_url('/admin/employes') ?>"><i class="bi bi-people"></i> Employés</a></li>
                     <li><a href="<?= site_url('/admin/departements') ?>"><i class="bi bi-building"></i> Départements</a>
                     </li>
@@ -280,11 +280,50 @@
     <script>
         let currentSection = null;
 
+        function updateNavActive(section) {
+            const links = document.querySelectorAll('.sidebar-nav a');
+            links.forEach(link => {
+                link.classList.remove('active');
+            });
+            if (section === 'employes') {
+                links.forEach(link => {
+                    if (link.getAttribute('href').includes('/admin/employes')) {
+                        link.classList.add('active');
+                    }
+                });
+            } else if (section === 'departements') {
+                links.forEach(link => {
+                    if (link.getAttribute('href').includes('/admin/departements')) {
+                        link.classList.add('active');
+                    }
+                });
+            } else if (section === 'types') {
+                links.forEach(link => {
+                    if (link.getAttribute('href').includes('/admin/types')) {
+                        link.classList.add('active');
+                    }
+                });
+            } else if (section === 'soldes') {
+                links.forEach(link => {
+                    if (link.getAttribute('href').includes('/admin/soldes')) {
+                        link.classList.add('active');
+                    }
+                });
+            } else {
+                links.forEach(link => {
+                    if (link.getAttribute('href').includes('/admin/dashboard')) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        }
+
         function loadSection(section) {
             currentSection = section;
             // Masquer le dashboard
             document.getElementById('dashboard-content').style.display = 'none';
             document.getElementById('ajax-content').style.display = 'block';
+            updateNavActive(section);
 
             // Charger la section 
             fetch('<?= site_url('/admin/ajax/') ?>' + section)
@@ -307,6 +346,7 @@
             document.getElementById('ajax-content').style.display = 'none';
             document.getElementById('ajax-content').innerHTML = '';
             document.getElementById('dashboard-content').style.display = 'block';
+            updateNavActive('dashboard');
             return false;
         }
 
