@@ -14,17 +14,17 @@
 	- Verifier 5 tables: departements, types_conge, employes, soldes, conges
 	- Corriger les contraintes manquantes (unique email, FK, etc.)
 	- Creer/mettre a jour le seeder de demo avec comptes de test
-- [] Routes (app/Config/Routes.php) [A]
+- [x] Routes (app/Config/Routes.php) [A]
 	- Declarer routes publiques: /, /login (GET), /login (POST), /logout (GET)
 	- Declarer routes protegees par role: /employe/*, /rh/*, /admin/*
 	- Activer filtres d auth et de role
 
 ## P1 - Authentification et securite (prerequis pour toutes pages)
-- [] Controller Auth [A]
+- [x] Controller Auth [A]
 	- Methode loginForm(): affiche la vue connexion
 	- Methode login(): valide les champs, verifie mot de passe, ouvre la session
 	- Methode logout(): detruit la session et redirige
-- [] Filtre Auth [A]
+- [x] Filtre Auth [A]
 	- Refuser l acces si non connecte
 	- Redirection vers /login avec flash message
 - [] Verif role dans chaque controller [A]
@@ -57,8 +57,8 @@
 	- Appliquer regle: solde deduit uniquement a l approbation
 
 ## P3 - Espace employe (pages fonctionnelles)
-- [] Routes /employe/dashboard, /employe/demande, /employe/mes-demandes [A]
-- [] Controller Employe [A]
+- [x] Routes /employe/dashboard, /employe/demande, /employe/mes-demandes [A]
+- [x] Controller Employe [A]
 	- dashboard(): stats + soldes + dernieres demandes
 	- formulaire(): affiche la page nouvelle demande
 	- submitDemande(): cree la demande, statut en_attente
@@ -74,8 +74,8 @@
 	- pas de chevauchement dates actives
 
 ## P4 - Espace RH (validation demandes)
-- [] Routes /rh/demandes, /rh/demandes/{id}, /rh/valider, /rh/refuser [B]
-- [] Controller RH [B]
+- [x] Routes /rh/demandes, /rh/demandes/{id}, /rh/valider, /rh/refuser [B]
+- [x] Controller RH [B]
 	- index(): liste des demandes en attente + filtres
 	- approuver(): verifie solde, maj statut, maj solde
 	- refuser(): maj statut + commentaire
@@ -89,8 +89,8 @@
 	- Si annule/refuse apres approbation: decrementer jours_pris
 
 ## P5 - Espace admin (CRUD + supervision)
-- [] Routes /admin/dashboard, /admin/employes, /admin/departements, /admin/types, /admin/soldes [B]
-- [] Controller Admin [B]
+- [x] Routes /admin/dashboard, /admin/employes, /admin/departements, /admin/types, /admin/soldes [B]
+- [x] Controller Admin [B]
 	- dashboard(): stats globales
 	- CRUD Employes: create/edit/disable
 	- CRUD Departements
