@@ -30,7 +30,7 @@ class EmployeController extends BaseController
     public function dashboard()
     {
         $annee = date('Y');
-        
+
         $soldes = $this->getSoldesAnnee($this->userId, $annee);
 
         $dernieresDemandes = array_slice($this->congeModel->listByEmploye($this->userId), 0, 5);
@@ -143,7 +143,7 @@ class EmployeController extends BaseController
     {
         $debut = new \DateTime($dateDebut);
         $fin = new \DateTime($dateFin);
-        
+
         $nbJours = 0;
         while ($debut <= $fin) {
             // Compter seulement les jours de semaine (1-5 = Lun-Ven)
@@ -152,24 +152,24 @@ class EmployeController extends BaseController
             }
             $debut->modify('+1 day');
         }
-        
+
         return $nbJours;
     }
 
-            /**
-             * Récupère les soldes d'un employé pour une année donnée.
-             */
-            private function getSoldesAnnee(int $employeId, int $annee): array
-            {
-                $soldes = $this->soldeModel
-                    ->where('employe_id', $employeId)
-                    ->where('annee', $annee)
-                    ->findAll();
+    /**
+     * Récupère les soldes d'un employé pour une année donnée.
+     */
+    private function getSoldesAnnee(int $employeId, int $annee): array
+    {
+        $soldes = $this->soldeModel
+            ->where('employe_id', $employeId)
+            ->where('annee', $annee)
+            ->findAll();
 
-                foreach ($soldes as &$solde) {
-                    $solde['jours_restants'] = (float) $solde['jours_attribues'] - (float) $solde['jours_pris'];
-                }
+        foreach ($soldes as &$solde) {
+            $solde['jours_restants'] = (float) $solde['jours_attribues'] - (float) $solde['jours_pris'];
+        }
 
-                return $soldes;
-            }
+        return $soldes;
+    }
 }

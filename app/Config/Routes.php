@@ -7,6 +7,7 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 // ===== ROUTES PUBLIQUES =====
+$routes->get('/', 'HomeController::index');
 $routes->get('/login', 'AuthController::loginForm');
 $routes->post('/login', 'AuthController::login');
 $routes->get('/logout', 'AuthController::logout');
